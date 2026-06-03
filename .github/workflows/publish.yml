@@ -1,0 +1,83 @@
+name: Publish to npm
+
+# Publishes this package to npm using OIDC Trusted Publishing — no NPM_TOKEN,
+# no 2FA OTP. The registry trusts this workflow's signed OIDC identity.
+#
+# Trigger: push a version tag (e.g. `git tag v1.2.2 && git push origin v1.2.2`)
+#          or run manually via the Actions tab (workflow_dispatch).
+#
+# One-time prerequisite (npmjs.com → package → Settings → Trusted Publisher):
+#   Provider:  GitHub Actions
+#   Org/user:  Fozikio
+#   Repository: <this repo>
+#   Workflow:  publish.yml
+#   Allowed action: npm publish   (must be selected explicitly for configs
+#                                  created after 2026-05-20)
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  id-token: write   # REQUIRED: lets npm authenticate this run via OIDC
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          # NOTE: deliberately NO registry-url. setup-node's registry-url writes
+          # an empty `_authToken` into .npmrc, which shadows OIDC (npm only does
+          # trusted-publishing OIDC when no registry token is configured).
+
+      # Trusted publishing requires npm >= 11.5.1. Node 24 ships npm 11.x, but
+      # upgrade explicitly so the version is never in doubt.
+      - name: Upgrade npm for OIDC support
+        run: npm install -g npm@latest
+
+      - name: Diagnose OIDC prerequisites
+        run: |
+          echo "npm version: $(npm -v)"
+          echo "node version: $(node -v)"
+          echo "OIDC token URL present: ${ACTIONS_ID_TOKEN_REQUEST_URL:+yes}"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      # Safety: a `v*` tag must match package.json (skipped for manual runs).
+      - name: Verify tag matches package version
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          PKG_VERSION=$(node -p "require('./package.json').version")
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          if [ "$PKG_VERSION" != "$TAG_VERSION" ]; then
+            echo "::error::Tag v$TAG_VERSION does not match package.json version $PKG_VERSION"
+            exit 1
+          fi
+
+      - name: Skip if this version is already on npm
+        id: published
+        run: |
+          PKG=$(node -p "require('./package.json').name")
+          VER=$(node -p "require('./package.json').version")
+          if npm view "$PKG@$VER" version >/dev/null 2>&1; then
+            echo "already=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::$PKG@$VER already on npm — skipping publish (idempotent)."
+          else
+            echo "already=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Publish
+        if: steps.published.outputs.already == 'false'
+        run: npm publish --access public

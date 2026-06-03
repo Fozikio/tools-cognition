@@ -1,0 +1,55 @@
+{
+  "name": "@fozikio/tools-cognition",
+  "version": "0.1.1",
+  "description": "Cognitive tools for cortex-engine — observe, wonder, speculate, believe, recall, reflect, digest, dream, wander, predict, ruminate.",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "peerDependencies": {
+    "@fozikio/cortex-engine": ">=0.1.0"
+  },
+  "devDependencies": {
+    "@fozikio/cortex-engine": "^1.2.0",
+    "typescript": "^5.7.0"
+  },
+  "keywords": [
+    "cortex",
+    "plugin",
+    "cognition",
+    "observe",
+    "memory",
+    "mcp",
+    "ai-agent",
+    "dream",
+    "reflect",
+    "fozikio"
+  ],
+  "license": "MIT",
+  "author": "Fozikio <hello@fozikio.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Fozikio/tools-cognition.git"
+  },
+  "homepage": "https://github.com/Fozikio/tools-cognition#readme",
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/idapixl"
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md"
+  ]
+}
