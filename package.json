@@ -51,5 +51,8 @@
     "dist",
     "LICENSE",
     "README.md"
-  ]
+  ],
+  "overrides": {
+    "hono": "^4.12.31"
+  }
 }
