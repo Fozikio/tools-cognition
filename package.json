@@ -1,7 +1,7 @@
 {
   "name": "@fozikio/tools-cognition",
   "version": "0.1.1",
-  "description": "Cognitive tools for cortex-engine \u00e2\u20ac\u201d observe, wonder, speculate, believe, recall, reflect, digest, dream, wander, predict, ruminate.",
+  "description": "Cognitive tools for cortex-engine — observe, wonder, speculate, believe, recall, reflect, digest, dream, wander, predict, ruminate.",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
